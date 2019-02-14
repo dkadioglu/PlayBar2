@@ -28,3 +28,7 @@ build/
 # KDevelop Project files
 *.kdev4
 .kdev4/
+
+*.user
+
+*.autosave

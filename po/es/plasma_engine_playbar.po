@@ -1,128 +1,235 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Smith AR <audoban@openmailbox.org>, 2015.
+# Smith AR <audoban@openmailbox.org>, 2015, 2016, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://github.com/audoban/PlayBar2\n"
-"POT-Creation-Date: 2015-07-30 22:10-0500\n"
-"PO-Revision-Date: 2015-08-01 15:30-0500\n"
-"Last-Translator: Smith AR <audoban@openmailbox.org>\n"
-"Language-Team: Spanish <>\n"
+"POT-Creation-Date: 2017-06-12 18:23-0500\n"
+"PO-Revision-Date: 2017-06-12 18:24-0500\n"
+"Last-Translator: Smith Ar <audoban@openmailbox.org>\n"
+"Language-Team: Spanish <kde-i18n-doc@kde.org>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 2.0\n"
 
-#: configdialog.cpp:33
+#. i18n: file: ../../engine/generalconfig.ui:31
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox_Compact)
+#: ../../rc.cpp:3
+msgid "Compact"
+msgstr "Compacto:"
+
+#. i18n: file: ../../engine/generalconfig.ui:52
+#. i18n: ectx: property (text), widget (QLabel, label_compactLayout)
+#: ../../rc.cpp:6
+msgid "Layout:"
+msgstr "Diseño:"
+
+#. i18n: file: ../../engine/generalconfig.ui:81
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_CompactStyle)
+#: ../../rc.cpp:9
+msgid "Icon"
+msgstr "Icono"
+
+#. i18n: file: ../../engine/generalconfig.ui:86
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_CompactStyle)
+#: ../../rc.cpp:12
+msgid "Playback buttons"
+msgstr "Controles multimedia"
+
+#. i18n: file: ../../engine/generalconfig.ui:91
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_CompactStyle)
+#: ../../rc.cpp:15
+msgid "Play/Pause and seek bar"
+msgstr "Reproducir/Pausar y barra de búsqueda"
+
+#. i18n: file: ../../engine/generalconfig.ui:96
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_CompactStyle)
+#: ../../rc.cpp:18
+msgid "Play/Pause and track info"
+msgstr "Reproducir/Pausar y información de pista"
+
+#. i18n: file: ../../engine/generalconfig.ui:113
+#. i18n: ectx: property (text), widget (QLabel, label_MaxWidth)
+#: ../../rc.cpp:21
+msgid "Maximum width:"
+msgstr "Ancho máximo:"
+
+#. i18n: file: ../../engine/generalconfig.ui:129
+#. i18n: ectx: property (suffix), widget (QSpinBox, kcfg_MaxWidth)
+#: ../../rc.cpp:24
+msgid " px"
+msgstr " px"
+
+#. i18n: file: ../../engine/generalconfig.ui:167
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox_Expanded)
+#: ../../rc.cpp:27
+msgid "Expanded"
+msgstr "Expandido:"
+
+#. i18n: file: ../../engine/generalconfig.ui:182
+#. i18n: ectx: property (text), widget (QLabel, label_Layout)
+#: ../../rc.cpp:30
+msgid "Preferred layout:"
+msgstr "Diseño preferido:"
+
+#. i18n: file: ../../engine/generalconfig.ui:214
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_ExpandedStyle)
+#: ../../rc.cpp:33
+msgid "Horizontal"
+msgstr "Horizontal"
+
+#. i18n: file: ../../engine/generalconfig.ui:219
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_ExpandedStyle)
+#: ../../rc.cpp:36
+msgid "Vertical"
+msgstr "Vertical"
+
+#. i18n: file: ../../engine/generalconfig.ui:236
+#. i18n: ectx: property (text), widget (QLabel, label_Controls)
+#: ../../rc.cpp:39
+msgid "Controls:"
+msgstr "Controles:"
+
+#. i18n: file: ../../engine/generalconfig.ui:255
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ShowStop)
+#: ../../rc.cpp:42
+msgid "Show stop button"
+msgstr "Mostrar botón de stop"
+
+#. i18n: file: ../../engine/generalconfig.ui:262
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ShowSeekSlider)
+#: ../../rc.cpp:45
+msgid "Show seek slider"
+msgstr "Mostrar barra de búsqueda"
+
+#. i18n: file: ../../engine/generalconfig.ui:269
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ShowVolumeSlider)
+#: ../../rc.cpp:48
+msgid "Show volume slider"
+msgstr "Mostrar deslizador de volumen"
+
+#. i18n: file: ../../engine/generalconfig.ui:294
+#. i18n: ectx: property (title), widget (QGroupBox, kcfg_BackgroundHint)
+#: ../../rc.cpp:51
+msgid "Background hint (Only desktop view)"
+msgstr "Sugerencias de fondo (Solo vista de escritorio)"
+
+#. i18n: file: ../../engine/generalconfig.ui:312
+#. i18n: ectx: property (text), widget (QRadioButton, kcfg_NoBackground)
+#: ../../rc.cpp:54
+msgid "No ba&ckground"
+msgstr "Sin fondo"
+
+#. i18n: file: ../../engine/generalconfig.ui:385
+#. i18n: ectx: property (text), widget (QLabel, label_ShadowColor)
+#: ../../rc.cpp:57
+msgid "Shadow color:"
+msgstr "Color de sombra:"
+
+#. i18n: file: ../../engine/generalconfig.ui:417
+#. i18n: ectx: property (text), widget (QRadioButton, kcfg_Normal)
+#: ../../rc.cpp:60
+msgid "&Normal"
+msgstr "Normal"
+
+#. i18n: file: ../../engine/generalconfig.ui:436
+#. i18n: ectx: property (text), widget (QRadioButton, kcfg_Translucent)
+#: ../../rc.cpp:63
+msgid "Transl&ucent"
+msgstr "Translúcido"
+
+#: ../../engine/configdialog.cpp:33
 msgid "Configure PlayBar"
 msgstr "Configurar PlayBar"
 
-#: configdialog.cpp:37
+#: ../../engine/configdialog.cpp:38 ../../engine/configdialog.cpp:40
 msgctxt "General config"
 msgid "General"
 msgstr "General"
 
-#: configdialog.cpp:38
+#: ../../engine/configdialog.cpp:43
 msgctxt "Shortcuts config"
 msgid "Shortcuts"
 msgstr "Accesos rápidos"
 
-#: configdialog.cpp:38
+#: ../../engine/configdialog.cpp:45
 msgid "Shortcuts Configuration"
 msgstr "Configuración de accesos rápidos"
 
-#: playbar.cpp:50
+#: ../../engine/playbar.cpp:50
 msgid "Play/Pause"
 msgstr "Reproducir/Pausar"
 
-#: playbar.cpp:55
+#: ../../engine/playbar.cpp:55
 msgid "Stop"
 msgstr "Parar"
 
-#: playbar.cpp:60
+#: ../../engine/playbar.cpp:60
 msgid "Next track"
 msgstr "Pista siguiente"
 
-#: playbar.cpp:65
+#: ../../engine/playbar.cpp:65
 msgid "Previous track"
 msgstr "Pista anterior"
 
-#: playbar.cpp:69
+#: ../../engine/playbar.cpp:70
 msgid "Toggle window media player"
 msgstr "Conmutar la ventana del reproductor"
 
-#. i18n: file: generalconfig.ui:31
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ShowStop)
-#. i18n: file: playbar.kcfg:13
-#. i18n: ectx: label, entry (ShowStop), group (General)
-#: playbarsettings.cpp:39 rc.cpp:3 rc.cpp:30
-msgid "Show stop button"
-msgstr "Mostrar botón de stop"
+#~ msgid "Background hint"
+#~ msgstr "Sugerencias de fondo"
 
-#: playbarsettings.cpp:43
-msgid "Controls on bar"
-msgstr "Controles en linea"
+#~ msgid "Playback controls"
+#~ msgstr "Controles de reproducción"
 
-#. i18n: file: playbar.kcfg:21
-#. i18n: ectx: label, entry (ButtonsAppearance), group (General)
-#: playbarsettings.cpp:48 rc.cpp:36
-msgid "Buttons appearance"
-msgstr "Apariencia de los botones"
+#~ msgid "Default"
+#~ msgstr "Por defecto"
 
-#. i18n: file: generalconfig.ui:110
-#. i18n: ectx: property (title), widget (QGroupBox, kcfg_BackgroundHint)
-#. i18n: file: playbar.kcfg:25
-#. i18n: ectx: label, entry (BackgroundHint), group (General)
-#: playbarsettings.cpp:53 rc.cpp:18 rc.cpp:39
-msgid "Background hints"
-msgstr "Sugerencias de fondo"
+#~ msgid "Appearance of controls"
+#~ msgstr "Apariencia de los controles"
 
-#. i18n: file: generalconfig.ui:41
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_ControlsOnBar)
-#. i18n: file: playbar.kcfg:17
-#. i18n: ectx: label, entry (ControlsOnBar), group (General)
-#: rc.cpp:6 rc.cpp:33
-msgid "Playback controls on the bar"
-msgstr "Controles de reproducción en linea"
+#~ msgid "F&lat"
+#~ msgstr "Plano"
 
-#. i18n: file: generalconfig.ui:57
-#. i18n: ectx: property (title), widget (QGroupBox, kcfg_ButtonsAppearance)
-#: rc.cpp:9
-msgid "Buttons appareance"
-msgstr "Apariencia de los botones"
+#~ msgid "&Tool button"
+#~ msgstr "Botón de herramientas"
 
-#. i18n: file: generalconfig.ui:72
-#. i18n: ectx: property (text), widget (QRadioButton, flat)
-#: rc.cpp:12
-msgid "F&lat"
-msgstr "P&lano"
+#~ msgid "On desktop background"
+#~ msgstr "En fondo de escritorio"
 
-#. i18n: file: generalconfig.ui:88
-#. i18n: ectx: property (text), widget (QRadioButton, toolbutton)
-#: rc.cpp:15
-msgid "T&ool button"
-msgstr "B&otón de herramientas"
+#~ msgid "Compact representation"
+#~ msgstr "Representación compacta"
 
-#. i18n: file: generalconfig.ui:131
-#. i18n: ectx: property (text), widget (QRadioButton, nobackground)
-#: rc.cpp:21
-msgid "No bac&kground"
-msgstr "Si&n fondo"
+#~ msgid "Flat"
+#~ msgstr "Plano"
 
-#. i18n: file: generalconfig.ui:144
-#. i18n: ectx: property (text), widget (QRadioButton, normal)
-#: rc.cpp:24
-msgid "Nor&mal"
-msgstr "Norm&al"
+#~ msgid "Tool button"
+#~ msgstr "Botón de herramientas"
 
-#. i18n: file: generalconfig.ui:163
-#. i18n: ectx: property (text), widget (QRadioButton, translucent)
-#: rc.cpp:27
-msgid "Transl&ucent"
-msgstr "&Translúcido"
+#~ msgid "Normal"
+#~ msgstr "Normal"
 
+#~ msgid "Translucent"
+#~ msgstr "Translúcido"
 
+#~ msgid "Buttons appearance"
+#~ msgstr "Apariencia de los botones"
+
+#, fuzzy
+#~ msgid "Flat button"
+#~ msgstr "B&otón de herramientas"
+
+#, fuzzy
+#~ msgid "ToolButton"
+#~ msgstr "B&otón de herramientas"
+
+#~ msgid "Buttons appareance"
+#~ msgstr "Apariencia de los botones"
+
+#~ msgid "Nor&mal"
+#~ msgstr "Norm&al"

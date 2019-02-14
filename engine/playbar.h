@@ -20,7 +20,10 @@
 #ifndef PLAYBAR_H
 #define PLAYBAR_H
 
+#include <atomic>
+
 #include <QAction>
+#include <QTimer>
 
 #include <KActionCollection>
 #include <Plasma/DataEngine>
@@ -30,55 +33,62 @@
 
 using namespace Plasma;
 
-class PlayBar : public QObject {
-	Q_OBJECT
-  public:
-  
-	PlayBar( KSharedConfigPtr &config, QObject *parent = 0 );
-	
-	virtual ~PlayBar();
-	
-	inline const QString &source() const {
-		return mpris2_source;
-	}
-	
-	inline void setSource( const QString &source ) {
-		mpris2_source = source;
-	}
-	
-	const DataEngine::Data &data();
-	
-	void startOpOverMpris2( const QString &name ) const;
-	
-  public Q_SLOTS:
-  
-	void slotPlayPause();
-	void slotStop();
-	void slotNext();
-	void slotPrevious();
-	void slotToggleWinMediaPlayer();
-	void showSettings();
-	
-  private:
-  
-	ConfigDialog *m_configDialog;
-	KActionCollection *m_collection;
-	KSharedConfigPtr m_config;
-	DataEngine::Data *m_data;
-	DataEngineConsumer *m_dc;
-	const QString MPRIS2 = "mpris2";
-	
-	QAction *m_playpause;
-	QAction *m_stop;
-	QAction *m_next;
-	QAction *m_previous;
-	QAction *m_volumeUp;
-	QAction *m_volumeDown;
-	QAction *m_openMediaPlayer;
-	QAction *m_settingsAction;
-	
-  public:
-	QString mpris2_source = "@multiplex";
+class PlayBar : public QObject, public Plasma::DataEngineConsumer {
+    Q_OBJECT
+public:
+
+    PlayBar(KSharedConfigPtr &config, QObject *parent = 0);
+
+    virtual ~PlayBar();
+
+    inline QString source() const;
+    void setSource(const QString &source);
+
+    const DataEngine::Data &data();
+
+    inline void startAction(const QString &name) const;
+    inline void seek(qlonglong us) const;
+
+signals:
+    void nextSourceTriggered();
+
+public slots:
+    void dataUpdated(const QString &sourceName, const Plasma::DataEngine::Data &data);
+
+public slots:
+    void action_playPause();
+    void action_stop();
+    void action_next();
+    void action_previous();
+    void action_forward();
+    void action_backward();
+    void action_raise();
+    void action_nextSource();
+    void showSettings();
+
+private:
+    KSharedConfigPtr m_config;
+    ConfigDialog *m_configDialog {nullptr};
+    KActionCollection *m_collection {nullptr};
+    DataEngine* m_mpris2Engine {nullptr};
+    DataEngine::Data *m_data {nullptr};
+
+    const char * const MPRIS2 {"mpris2"};
+    qlonglong m_currentPosition {0};
+
+    QAction *m_playpause;
+    QAction *m_stop;
+    QAction *m_next;
+    QAction *m_previous;
+    QAction *m_forward;
+    QAction *m_backward;
+    QAction *m_raise;
+    QAction *m_nextSource;
+    QTimer *m_timerNextSource;
+    std::atomic_bool m_goNextSource {false};
+
+    QString mpris2_source {"@multiplex"};
 };
 
 #endif // PLAYBAR_H
+// kate: indent-mode cstyle; indent-width 4; replace-tabs on;

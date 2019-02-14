@@ -26,41 +26,54 @@
 #include "playbarservice.h"
 #include "playbarsettings.h"
 
-PlayBarEngine::PlayBarEngine( QObject *parent, const QVariantList &args )
-	: DataEngine( parent, args ) {
-	KSharedConfigPtr config = PlayBarSettings::self()->sharedConfig();
-	m_playbar = new PlayBar( config, this );
-	
-	setMinimumPollingInterval( 500 );
-	
-	connect( PlayBarSettings::self(), SIGNAL( configChanged() ), this, SLOT( updateData() ) );
+PlayBarEngine::PlayBarEngine(QObject *parent, const QVariantList &args)
+    : DataEngine(parent, args)
+{
+    KSharedConfigPtr config = PlayBarSettings::self()->sharedConfig();
+    m_playbar = new PlayBar(config, this);
+
+    setMinimumPollingInterval(0);
+    setPollingInterval(0);
+
+    connect(PlayBarSettings::self(), SIGNAL(configChanged()), this, SLOT(updateData()));
+    connect(m_playbar, SIGNAL(nextSourceTriggered()), this, SLOT(updateData()));
 }
 
-PlayBarEngine::~PlayBarEngine() {}
-
-Service *PlayBarEngine::serviceForSource( const QString &source ) {
-	if ( source != PROVIDER ) return nullptr;
-	
-	sourceRequestEvent( PROVIDER );
-	Service *service = new PlayBarService( m_playbar, this );
-	return service;
+PlayBarEngine::~PlayBarEngine()
+{
+    delete m_playbar;
 }
 
-void PlayBarEngine::updateData() {
-	updateSourceEvent( PROVIDER );
+Service *PlayBarEngine::serviceForSource(const QString &source)
+{
+    if (source != PROVIDER)
+        return nullptr;
+
+    sourceRequestEvent(PROVIDER);
+    Service *service = new PlayBarService(m_playbar, this);
+    return service;
 }
 
-bool PlayBarEngine::sourceRequestEvent( const QString &source ) {
-	if ( source != PROVIDER ) return false;
-	
-	updateSourceEvent( PROVIDER );
-	return true;
+void PlayBarEngine::updateData()
+{
+    updateSourceEvent(PROVIDER);
 }
 
-bool PlayBarEngine::updateSourceEvent( const QString &source ) {
-	setData( source, m_playbar->data() );
-	return true;
+bool PlayBarEngine::sourceRequestEvent(const QString &source)
+{
+    if (source != PROVIDER)
+        return false;
+
+    updateSourceEvent(PROVIDER);
+    return true;
 }
 
-K_EXPORT_PLASMA_DATAENGINE_WITH_JSON( playbar, PlayBarEngine, "plasma-dataengine-playbar.json" )
+bool PlayBarEngine::updateSourceEvent(const QString &source)
+{
+    setData(source, m_playbar->data());
+    return true;
+}
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(playbar, PlayBarEngine, "plasma-dataengine-playbar.json")
 #include "playbarengine.moc"
+// kate: indent-mode cstyle; indent-width 4; replace-tabs on;

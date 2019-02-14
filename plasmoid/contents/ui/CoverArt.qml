@@ -1,114 +1,131 @@
 /*
- *   Author: audoban <audoban@openmailbox.org>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as
- *   published by the Free Software Foundation; either version 2 or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+*   Author: audoban <audoban@openmailbox.org>
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU Library General Public License as
+*   published by the Free Software Foundation; either version 3 or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details
+*
+*   You should have received a copy of the GNU Library General Public
+*   License along with this program; if not, write to the
+*   Free Software Foundation, Inc.,
+*   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 import QtQuick 2.4
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
+import QtQuick.Controls 1.4
 import org.kde.plasma.core 2.0 as PlasmaCore
-import "../code/utils.js" as Utils
+import QtGraphicalEffects 1.0
 
-Rectangle{
-	id: bg
+Item {
+    id: bg
 
-	width: units.iconSizes.enormous
-	height: units.iconSizes.enormous
-	color: Utils.adjustAlpha(theme.complementaryBackgroundColor, 0.3)
-	radius: 2
-	opacity: 0.3
+    readonly property int paintedWidth: noCover.visible ? noCover.paintedWidth : cover.paintedWidth
+    readonly property int paintedHeight: noCover.visible ? noCover.paintedHeight : cover.paintedHeight
 
-	Layout.minimumWidth: height
-	Layout.minimumHeight: units.iconSizes.enormous
-	Layout.preferredWidth: units.iconSizes.enormous 
-	Layout.preferredHeight: units.iconSizes.enormous 
-	Layout.maximumWidth: height
-	Layout.maximumHeight: units.iconSizes.enormous
-	Layout.fillHeight: true
-	Layout.fillWidth: false
-	
-	border{
-		width: 1
-		color: color
-	}
+    readonly property int coverLeftMargin: (bg.width - paintedWidth) / 2 + units.smallSpacing
+    readonly property int coverTopMargin: (bg.height - paintedHeight) / 2 + units.smallSpacing
 
-	OpacityAnimator on opacity{
-		id: appear
-		running: false
-		alwaysRunToEnd: true
-		from: 0.3
-		to: 1.0
-		duration: units.longDuration
-	}
+    readonly property alias containsMouse: toggleWindow.containsMouse
 
-	OpacityAnimator on opacity{
-		id: fade
-		running: false
-		alwaysRunToEnd: true
-		from: 1.0
-		to: 0.3
-		duration: units.longDuration
-	}
+    property alias noCoverIcon: noCover.source
+    property bool forceNoCover: false
 
+    width: units.iconSizes.enormous
+    height: units.iconSizes.enormous
+    Layout.fillWidth: true
+    Layout.fillHeight: true
 
-	Image{
-		id: cover
+    Timer {
+        id: timer
+        repeat: false
+        interval: 250
 
-		source: mpris2.artUrl
-		fillMode: Image.PreserveAspectFit
-		anchors.centerIn: parent
+        onTriggered: {
+            noCover.visible = cover.status === Image.Null || cover.status === Image.Error || forceNoCover
+        }
+    }
 
-		width: parent.width - 2
-		height: parent.height - 2
-		clip: true
+    PlasmaCore.IconItem {
+        id: noCover
 
-		sourceSize.width: parent.width - 2
-		sourceSize.height: parent.height - 2
+        anchors.fill: parent
+        source: 'nocover'
+        smooth: true
+    }
 
-		horizontalAlignment: Image.AlignHCenter
-		verticalAlignment: Image.AlignVCenter
+    Image {
+        id: cover
 
-		onStatusChanged: {
-			if( status === Image.Ready )
-				appear.start()
-			else if( status === Image.Null || status === Image.Error ){
-				fade.start()
-				debug("Fade on CoverArt", status )
-			}
-		}
-	}
-	
-	PlasmaCore.IconItem {
-		id: noCover
-		
-		anchors.centerIn: parent
-		width: parent.width - 2
-		height: parent.height - 2
-		
-		source: "tools-rip-audio-cd"
-		smooth: true
-		
-		visible: cover.status !== Image.Ready || !mpris2.sourceActive
-		
-	}
-	
-	MouseArea{
-		id: toggleWindow
-		anchors.fill: parent
-		acceptedButtons: Qt.LeftButton
-		onClicked: action_raise()
-	}
+        source: Qt.resolvedUrl(mpris2.artUrl)
+        fillMode: Image.PreserveAspectFit
+        anchors.fill: parent
+        mipmap: true
+        cache: false
+        visible: !forceNoCover
+
+        sourceSize.width: width
+        sourceSize.height: height
+
+        horizontalAlignment: Image.AlignHCenter
+        verticalAlignment: Image.AlignVCenter
+
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            source: cover
+            width: cover.width
+            height: cover.height
+            cached: false
+            maskSource: Item {
+                width: cover.width
+                height: cover.height
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: cover.paintedWidth
+                    height: cover.paintedHeight
+                    border.width: 0
+                    radius: units.gridUnit * 0.3
+                }
+            }
+        }
+
+        onStatusChanged: {
+            if (status === Image.Loading) {
+                animB.stop()
+                animA.start()
+            } else if (status === Image.Ready) {
+                animA.stop()
+                animB.start()
+            }
+            timer.restart()
+        }
+
+        OpacityAnimator on opacity {
+            id: animA
+            running: false
+            to: 0.0
+            duration: units.shortDuration
+        }
+
+        OpacityAnimator on opacity {
+            id: animB
+            running: false
+            to: 1.0
+            duration: units.longDuration * 1.5
+        }
+    }
+
+    MouseArea {
+        id: toggleWindow
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        onClicked: action_raise()
+        hoverEnabled: true
+    }
+
 }

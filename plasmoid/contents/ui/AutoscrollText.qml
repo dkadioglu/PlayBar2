@@ -1,87 +1,120 @@
 /*
- *   Author: audoban <audoban@openmailbox.org>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as
- *   published by the Free Software Foundation; either version 2 or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+*   Author: audoban <audoban@openmailbox.org>
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU Library General Public License as
+*   published by the Free Software Foundation; either version 3 or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details
+*
+*   You should have received a copy of the GNU Library General Public
+*   License along with this program; if not, write to the
+*   Free Software Foundation, Inc.,
+*   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 import QtQuick 2.4
 
-Item{
-	id: scroll
+Item {
+    id: scroll
 
-	property var target
+    property var target
 
-	property bool scrolling: false
+    property bool scrolling: false
 
-	property bool isScrollable: false
+    property bool isScrollable: false
 
-	focus: false
+    property bool autoScroll: false
 
-	SequentialAnimation{
-		id: anim
-		running: false
-		alwaysRunToEnd: true
-		loops: Animation.Infinite
+    property int velocity: 60
 
-		onStopped: {
-			if( scrollArea.containsMouse && !running ) anim.restart()
-			else scrolling = false
-		}
+    property bool vertical: false
 
-		SmoothedAnimation{
-			id: animA
-			target: scroll.target
-			property: 'x'
-			from: 0
-			to: - ( target.contentWidth - target.width + units.smallSpacing )
-			velocity: 60
-		}
-		SmoothedAnimation{
-			id: animB
-			target: scroll.target
-			property: 'x'
-			to: 0
-			velocity: 80
-		}
-		Component.onCompleted: {
-			isScrollable = target.contentWidth > target.width || target.truncated
-			target.textChanged.connect( function(){
-				isScrollable = target.contentWidth > target.width || target.truncated
-				scrolling = false
-			})
-		}
-	}
+    property bool reverse: false
 
-	MouseArea{
-		id: scrollArea
+    readonly property int contentSize: target.contentWidth
 
-		anchors.fill: parent
-		acceptedButtons: Qt.NoButton
-		hoverEnabled: true
+    readonly property int size: target.width
 
-		function initAutoScroll(){
-			isScrollable = target.contentWidth > target.width || target.truncated
-			if(isScrollable && !anim.running){
-				scrolling = true
-				anim.start()
-			}else if(scrolling && !anim.running){
-				anim.start()
-			}
-		}
-		onEntered: initAutoScroll()
-		onExited: if(anim.running) anim.stop()
-	}
+    focus: false
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        hoverEnabled: true
+        onEntered: start()
+    }
+
+    function start() {
+        if (!anim.running && _isScrollable()) {
+            scrolling = true
+            anim.start()
+        }
+    }
+
+    function restart() {
+        stop()
+        if (_isScrollable()) {
+            scrolling = true
+            anim.restart()
+        }
+    }
+
+    function stop() {
+        anim.stop()
+        if (vertical) target.y = 0
+        else target.x = 0
+    }
+
+    function _isScrollable() {
+        return isScrollable = contentSize > size || target.truncated
+    }
+
+    Connections {
+        target: scroll.target
+        onWidthChanged: scroll.stop()
+        onHeightChanged: scroll.stop()
+        onTextChanged: scroll.stop()
+    }
+
+    SequentialAnimation {
+        id: anim
+        running: false
+
+        loops: autoScroll ? 2 : 1
+
+        onStopped: {
+            if (_isScrollable() && mouseArea.containsMouse)
+                anim.restart()
+            else
+                scrolling = false
+        }
+
+        PauseAnimation {
+            duration: 300
+        }
+
+        SmoothedAnimation {
+            id: end
+            target: scroll.target
+            property: scroll.vertical ? 'y' : 'x'
+            from: 0
+            // It goes to the end of the text
+            to: (size - contentSize - theme.mSize(theme.defaultFont).width) *  (scroll.reverse ? -1 : 1)
+            velocity: scroll.velocity
+        }
+
+        SmoothedAnimation {
+            id: begin
+            target: scroll.target
+            property: scroll.vertical ? 'y' : 'x'
+            // it goes to the beginning of the text
+            to: 0
+            velocity: scroll.velocity * 1.1
+        }
+    }
 }

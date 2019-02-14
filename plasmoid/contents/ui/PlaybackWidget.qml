@@ -3,8 +3,8 @@
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU Library General Public License as
-*   published by the Free Software Foundation; either version 2 or
-*   (at your option) any later version.
+*   published by the Free Software Foundation; either version 3 or
+*   (at your option ) any later version.
 *
 *   This program is distributed in the hope that it will be useful,
 *   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,107 +16,93 @@
 *   Free Software Foundation, Inc.,
 *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
 import QtQuick 2.4
-import QtQuick.Layouts 1.1
-import org.kde.plasma.core 2.0 as PlasmaCore
+import QtQuick.Layouts 1.2
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
-PlaybackItem{
-	id: playbackWidget
+PlaybackItem {
+    id: playbackWidget
 
-	property int buttonsAppearance: playbarEngine.buttonsAppearance
-	
-	visible: true
+    visible: true
 
-	buttonSize: units.iconSizes.medium
+    buttonSize: Qt.size(units.iconSizes.medium * 1.4, units.iconSizes.medium * 1.4)
 
-	implicitWidth: buttons.width
+    implicitWidth: buttons.width
 
-	implicitHeight: buttons.height
+    implicitHeight: buttons.height
 
-	Layout.fillWidth: true
-	Layout.fillHeight: true
-	Layout.maximumHeight: buttons.implicitHeight
-	Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
+    property alias spacing: buttons.spacing
 
-	onPlayingChanged: {
-		if(!model.itemAt(1)) return
+    Layout.minimumHeight: buttons.implicitHeight
+    Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
 
-		if(playing)
-			model.itemAt(1).iconSource = "media-playback-pause"
-		else
-			model.itemAt(1).iconSource = "media-playback-start"
-	}
+    ListModel {
+        id: playmodel
 
-	ListModel{
-		id: playmodel
+        ListElement {
+            icon: 'media-skip-backward'
+        }
+        ListElement {
+            icon: 'media-playback-start'
+        }
+        ListElement {
+            icon: 'media-playback-stop'
+        }
+        ListElement {
+            icon: 'media-skip-forward'
+        }
+    }
 
-		ListElement{
-			icon: "media-skip-backward"
-		}
-		ListElement{
-			icon: "media-playback-start"
-		}
-		ListElement{
-			icon: "media-playback-stop"
-		}
-		ListElement{
-			icon: "media-skip-forward"
-		}
-	}
+    Component {
+        id: toolButtonDelegate
 
-	Component{
-		id: toolButtonDelegate
+        PlasmaComponents.ToolButton {
+            id: toolButton
+            iconSource: icon
+            visible: !(index === 2) | showStop
+            property int size: !showStop && index === 1 ? buttonSize.width * 1.4 : buttonSize.width
+            Layout.minimumWidth: size
+            Layout.minimumHeight: size
+        }
+    }
 
-		PlasmaComponents.ToolButton{
-			iconSource: icon
-			visible: !(index == 2) | showStop
-			Layout.minimumWidth: buttonSize * 1.4
-			Layout.minimumHeight: buttonSize * 1.4
-		}
-	}
+    RowLayout {
+        id: buttons
 
-	Component{
-		id: iconWidgetDelegate
+        spacing: units.smallSpacing
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
-		IconWidget{
-			svg: PlasmaCore.Svg{ imagePath: "icons/media" }
-			iconSource: icon
-			visible: !(index == 2) | showStop
-			size: buttonSize
-		}
-	}
+        Repeater {
+            id: model
+            model: playmodel
+            delegate: toolButtonDelegate
 
-	RowLayout {
-		id: buttons
-
-		spacing: buttonsAppearance ? units.smallSpacing : units.largeSpacing
-		anchors.bottom: parent.bottom
-
-		Repeater{
-			id: model
-			model: playmodel
-			delegate: buttonsAppearance ? toolButtonDelegate : iconWidgetDelegate
-
-			onItemAdded: {
-				switch(index){
-					case 0 :
-						item.clicked.connect(previous)
-						break
-					case 1 :
-						item.clicked.connect(playPause)
-						//NOTE: update icon playing state
-						playingChanged()
-						break
-					case 2:
-						item.clicked.connect(stop)
-						break
-					case 3:
-						item.clicked.connect(next)
-						break
-				}
-			}
-		}
-	}
+            onItemAdded: {
+                switch (index) {
+                case 0:
+                    item.clicked.connect(mpris2.previous)
+                    item.enabled = Qt.binding(function () { return mpris2.canGoPrevious })
+                    break
+                case 1:
+                    item.clicked.connect(mpris2.playPause)
+                    item.enabled = Qt.binding(function () { return mpris2.canPlayPause })
+                    item.iconSource = Qt.binding(function() {
+                        return mpris2.playing ? 'media-playback-pause'
+                                              : 'media-playback-start'
+                    })
+                    //NOTE: update icon playing state
+                    break
+                case 2:
+                    item.clicked.connect(mpris2.stop)
+                    item.enabled = Qt.binding(function () { return mpris2.canControl })
+                    break
+                case 3:
+                    item.clicked.connect(mpris2.next)
+                    item.enabled = Qt.binding(function () { return mpris2.canGoNext })
+                    break
+                }
+            }
+        }
+    }
 }

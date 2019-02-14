@@ -1,86 +1,118 @@
 /*
- *   Author: audoban <audoban@openmailbox.org>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as
- *   published by the Free Software Foundation; either version 2 or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+*   Author: audoban <audoban@openmailbox.org>
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU Library General Public License as
+*   published by the Free Software Foundation; either version 3 or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details
+*
+*   You should have received a copy of the GNU Library General Public
+*   License along with this program; if not, write to the
+*   Free Software Foundation, Inc.,
+*   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 import QtQuick 2.4
-import QtQuick.Layouts 1.1
-import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.extras 2.0 as PlasmaExtras
+import QtQuick.Layouts 1.2
 
-Flow{
-	id: playbackControl
+Flow {
+    id: playbackControl
 
-	spacing: units.smallSpacing / 2
-	flow: vertical ? Flow.TopToBottom : Flow.LeftToRight
+    flow: vertical ? Flow.TopToBottom : Flow.LeftToRight
+    spacing: 0
 
-	Layout.minimumWidth: !vertical ? playbackBar.width  + playbackBar.buttonSize + spacing : units.iconSizes.small
-	Layout.minimumHeight: vertical ? playbackBar.height + playbackBar.buttonSize + spacing : units.iconSizes.small
-	anchors.fill: parent
+    Layout.minimumWidth: !vertical ? popupIconSize + loader.width : units.iconSizes.small
+    Layout.minimumHeight: vertical ? popupIconSize + loader.height : units.iconSizes.small
 
-	property int _buttonSize: vertical ? (parent && parent.width ? parent.width : 0 ): (parent && parent.height ? parent.height : 0 )
+    readonly property int _minSize: vertical ? (parent ? parent.width : units.iconSizes.small)
+                                             : (parent ? parent.height : units.iconSizes.small)
 
-	property alias playbackBarVisible: playbackBar.visible
+    readonly property int _iconSize:
+    Math.min(units.roundToIconSize(_minSize - units.smallSpacing), units.iconSizes.large)
 
+    readonly property size iconSize: vertical ? Qt.size(Math.max(_minSize, _iconSize), _iconSize)
+                                              : Qt.size(_iconSize, Math.max(_minSize, _iconSize))
 
-	VolumeWheel{
-		id: volumeWheelArea
-		parent: playbackBar.visible ? playbackBar : popupContainer
-		anchors.fill: parent
-	}
+    readonly property int popupIconSize: units.roundToIconSize(loaded && loader.item.visible
+            ? Math.min(units.iconSizes.smallMedium, _minSize - units.smallSpacing / 2.2)
+            : units.roundToIconSize(_minSize))
 
-	PlaybackBar{
-		id: playbackBar
-		buttonSize: parent._buttonSize
-	}
-
-	Item{
-		id: popupContainer
-		width: _buttonSize
-		height: _buttonSize
-
-		VolumeWheel{ anchors.fill: parent }
-
-		PopupButton{
-			id: popup
-
-			size: playbackBar.visible ?
-				_buttonSize * (playbarEngine.buttonsAppearance ? 0.5 : 0.7) : _buttonSize
-			anchors.centerIn: parent
-			opened: plasmoid.expanded
-
-			onClicked: {
-				plasmoid.expanded = !plasmoid.expanded
-			}
-		}
-	}
-
-	Timer{
-		//HACK: For PopupApplet in Notification Area
-		running: playbackBar.visible
-		interval: 100
-		onTriggered: {
-			if((!vertical && playbackBar.width > playbackControl.width) ||
-				(vertical && playbackBar.height > playbackControl.height)){
-				playbackBar.visible = false
-			}
-		}
-	}
+    readonly property bool loaded: loader.status === Loader.Ready
 
 
+    property bool containsMouse: false
+
+    onContainsMouseChanged: {
+        if (containsMouse)
+            toolTip.showToolTip()
+        else
+            toolTip.hideToolTip()
+    }
+
+    Component.onCompleted: toolTip.visualParent = playbackControl
+
+    onParentChanged: {
+        if (parent && parent.objectName === 'org.kde.desktop-CompactApplet') {
+            //! NOTE: disable the standard toolTip
+            parent.active = false
+            containsMouse = Qt.binding(function () { return parent.containsMouse })
+        }
+    }
+
+    Loader {
+        id: loader
+
+        width: status === Loader.Ready ? item.width : 0
+        height: status === Loader.Ready ? item.height : 0
+
+        source: {
+            switch (playbarEngine.compactStyle) {
+            case playbar.playbackButtons:
+                return 'PlaybackBar.qml'
+            case playbar.seekbar:
+                return 'SeekBar.qml'
+            case playbar.trackinfo:
+                return 'TrackInfoBar.qml'
+            }
+            return ''
+        }
+
+        onLoaded: {
+            item.buttonSize = Qt.binding(function () {
+                return iconSize
+            })
+        }
+    }
+
+    Item {
+        id: popupContainer
+
+        width: vertical ? _minSize : parent.width - loader.width
+        height: vertical ? parent.height - loader.height : _minSize
+
+        MediaPlayerArea {
+            anchors.fill: parent
+        }
+
+        PopupButton {
+            id: popup
+
+            controlsVisible: loaded && loader.item.visible
+
+            size: popupIconSize
+
+            opened: plasmoid.expanded
+            anchors.centerIn: parent
+            onClicked: {
+                if (mpris2.sourceActive)
+                    plasmoid.expanded = !plasmoid.expanded
+                else if (mpris2.recentSources.length > 0)
+                    action_player0()
+            }
+        }
+    }
 }

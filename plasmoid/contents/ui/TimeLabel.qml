@@ -1,104 +1,114 @@
 /*
- *   Author: audoban <audoban@openmailbox.org>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU Library General Public License as
- *   published by the Free Software Foundation; either version 2 or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details
- *
- *   You should have received a copy of the GNU Library General Public
- *   License along with this program; if not, write to the
- *   Free Software Foundation, Inc.,
- *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+*   Author: audoban <audoban@openmailbox.org>
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU Library General Public License as
+*   published by the Free Software Foundation; either version 3 or
+*   (at your option) any later version.
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details
+*
+*   You should have received a copy of the GNU Library General Public
+*   License along with this program; if not, write to the
+*   Free Software Foundation, Inc.,
+*   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 import QtQuick 2.4
-import org.kde.plasma.extras 2.0 as PlasmaExtras
-import "../code/utils.js" as Utils
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
-PlasmaExtras.Paragraph{
+PlasmaComponents.Label {
     id: time
 
-    // units in hundredth of second
-    property int topTime: mpris2.length
-    // units in hundredth of second
-    property int currentTime: mpris2.position
+    property alias type: time.state
 
-    property bool showPosition: true
+    readonly property int length: mpris2.length
 
-    property bool showRemaining: true
+    property int position: 0
 
-    property bool labelSwitch: false
+    property alias interactive: mouseArea.enabled
 
-    property alias interactive: mouseArea.hoverEnabled
+    property int hour: 0
 
-	property alias autoTimeUpdate: timer.running
+    property int min: 0
 
-	color: Utils.adjustAlpha(theme.textColor, 0.8)
+    property int sec: 0
 
-	enabled: mpris2.sourceActive & mpris2.length > 0
+    property var _update: lengthUpdate
 
-    function positionUpdate(negative) {
-        var min, sec
+    state: type
+    opacity: 0.8
+    font: theme.smallestFont
 
-        if (negative) sec = Math.abs((topTime - currentTime)/100)
-        else sec = currentTime/100
+    signal clicked
 
-		min = Utils.truncate(sec/60)
-		sec = Utils.truncate(sec - min*60)
+    text: (type == 'remaining' ? '-' : '')
+          + (hour > 0 ? hour + ':': '')
+          + (hour > 0 && min < 10 ? '0' + min : min)
+          + ':' + (sec < 10 ? '0' + sec : sec)
 
-		if(negative) text = '-' + min + ':'
-		else text = min + ':'
-		text += sec <= 9 ? '0' + sec : sec
+    enabled: length > 0
+
+    onPositionChanged: _update()
+    onLengthChanged: _update()
+    onTypeChanged: _update()
+
+    states: [
+        State {
+            name: 'length'
+            PropertyChanges {
+                target: time
+                _update: lengthUpdate
+            }
+        },
+        State {
+            name: 'position'
+            PropertyChanges {
+                target: time
+                _update: positionUpdate
+            }
+        },
+        State {
+            name: 'remaining'
+            PropertyChanges {
+                target: time
+                _update: remainingUpdate
+            }
+        }
+    ]
+
+    function positionUpdate() {
+        hour = position / 3600
+        min = position / 60 - hour * 60
+        sec = position - hour * 3600 - min * 60
+    }
+
+    function remainingUpdate() {
+        var remain = length - position
+        hour = remain / 3600
+        min = remain / 60 - hour * 60
+        sec = remain - hour * 3600 - min * 60
     }
 
     function lengthUpdate() {
-		var min
-		var sec = topTime/100
-		min = Utils.truncate(sec/60)
-		sec = Utils.truncate(sec - min*60)
-		time.text = min + ':' + ( sec <= 9 ? '0' + sec : sec )
-	}
+        hour = length / 3600
+        min = length / 60 - hour * 60
+        sec = length - hour * 3600 - min * 60
+    }
 
-	Timer{
-		id: timer
-
-		property bool _switch: labelSwitch
-
-		interval: 400
-		repeat: true
-		running: parent.visible
-		onTriggered: {
-			if(showPosition & showRemaining)
-				positionUpdate(_switch)
-			else if(_switch & showPosition)
-				positionUpdate(false)
-			else if(_switch & showRemaining)
-				positionUpdate(true)
-			else
-				lengthUpdate()
-		}
-	}
-
-    MouseArea{
+    MouseArea {
         id: mouseArea
 
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton
-		enabled: hoverEnabled
+        hoverEnabled: enabled
 
-		onEntered: color = theme.viewHoverColor
-        onExited: color = Utils.adjustAlpha(theme.textColor, 0.8)
-        onReleased: {
-            if (!exited || containsMouse ){
-				timer._switch = !timer._switch
-				plasmoid.configuration.TimeLabelSwitch = timer._switch
-                timer.triggered()
+        onClicked: {
+            if (containsMouse) {
+                time.clicked()
+                time._update()
             }
         }
     }

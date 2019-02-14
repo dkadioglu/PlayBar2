@@ -21,40 +21,74 @@
 #define GENERALWIDGET_H
 
 #include <QWidget>
+#include <QColor>
+
+#include <Plasma>
 
 #include "ui_generalconfig.h"
 
 class GeneralWidget : public QWidget {
-	Q_OBJECT
-  public:
-  
-	GeneralWidget( QWidget *parent );
-	virtual ~GeneralWidget();
-	
-  public:
-	inline bool showStop() {
-		return m_ui.kcfg_ShowStop->isChecked();
-	}
-	
-	inline bool controlsOnBar() {
-		return m_ui.kcfg_ControlsOnBar->isChecked();
-	}
-	
-	inline int buttonsAppearance() {
-		return m_buttonsAppearance;
-	}
-	inline int backgroundHint() {
-		return m_backgroundHint;
-	}
-	
-  private Q_SLOTS:
-	void setButtonsAppearance( bool checked );
-	void setBackgroundHint();
-	
-  private:
-	Ui::GeneralWidget m_ui;
-	int m_buttonsAppearance = 0;
-	int m_backgroundHint = 1;
+    Q_OBJECT
+public:
+    GeneralWidget(QWidget *parent);
+    virtual ~GeneralWidget();
+
+public:
+    inline int compactStyle() const {
+        return m_ui.kcfg_CompactStyle->currentIndex();
+    }
+
+    inline int maxWidth() const {
+        return m_ui.kcfg_MaxWidth->value();
+    }
+
+    inline int expandedStyle() const {
+        return m_ui.kcfg_ExpandedStyle->currentIndex();
+    }
+
+    inline bool showStop() const {
+        return m_ui.kcfg_ShowStop->isChecked();
+    }
+
+    inline bool showSeekSlider() const {
+        return m_ui.kcfg_ShowSeekSlider->isChecked();
+    }
+
+    inline bool showVolumeSlider() const {
+        return m_ui.kcfg_ShowVolumeSlider->isChecked();
+    }
+
+    inline int backgroundHint() const {
+        if (m_ui.kcfg_NoBackground->isChecked())
+            return 0;
+        else if (m_ui.kcfg_Normal->isChecked())
+            return 1;
+
+        return 2;
+    }
+
+    inline QColor shadowColor() const {
+        return m_ui.kcfg_ShadowColor->color();
+    }
+
+    inline bool noBackground() const {
+        return m_ui.kcfg_NoBackground->isChecked();
+    }
+
+    inline bool normal() const {
+        return m_ui.kcfg_Normal->isChecked();
+    }
+
+    inline bool translucent() const {
+        return m_ui.kcfg_Translucent->isChecked();
+    }
+
+Q_SIGNALS:
+    void shadowColorChanged(const QColor &color);
+
+private:
+    mutable Ui::GeneralWidget m_ui;
 };
 
 #endif // GENERALWIDGET_H
+// kate: indent-mode cstyle; indent-width 4; replace-tabs on;
